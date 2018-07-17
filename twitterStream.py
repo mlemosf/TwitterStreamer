@@ -6,6 +6,7 @@ from tweepy import Cursor
 from time import sleep
 from json import loads
 import twitter_credentials
+import sys
 
 class TwitterStreamer():
     def stream_tweets(self, fetched_tweets_filename,hashtag_list):
@@ -16,7 +17,7 @@ class TwitterStreamer():
 
         stream = Stream(auth, listener)
         stream.filter(track=hashtag_list)
-        
+
 
 
 class StdoutListener(StreamListener):
@@ -25,12 +26,15 @@ class StdoutListener(StreamListener):
         self.fetched_tweets_filename = fetched_tweets_filename
 
     def on_data(self, data):
+        color_bold = '\033[1m'
+        color_end = '\033[0m'
         counter = 0
         try:
-            d = loads(data)
-            formated = "+"+d['user']['name'] +"+ says '"+d['text']+"'"
+            data = loads(data)
+            formated = color_bold+data['user']['name'] +color_end+" says '"+data['text']+"'"
             print(formated)
-            sleep(10)
+            sleep(5)
+            data = ""
         except Exception as err:
             print(str(err))
         return True
@@ -41,7 +45,8 @@ class StdoutListener(StreamListener):
 
 
 if __name__ == '__main__':
-    hashtag_list = ['Elon Musk','SpaceX', 'Blockchain','Bitcoin', 'Ethereum','Iota']
+    hashtag_list = sys.argv[1:]
+    print(hashtag_list)
     fetched_tweets_filename = "tweets.json"
     twiterStreamer = TwitterStreamer()
     twiterStreamer.stream_tweets(fetched_tweets_filename, hashtag_list)
